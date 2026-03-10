@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#050816" />
+    <title>Resell Tracker · Shared Notes</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/jpeg" href="/icon.jpg" />
+    <link rel="apple-touch-icon" href="/icon.jpg" />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body class="app-body">
+    <div class="app-shell app-shell-visible">
+      <%- include('partials/header') %>
+
+      <main class="app-main">
+        <section class="dashboard">
+          <section class="dashboard-section">
+            <div class="card card-highlight">
+              <div class="section-header section-header-tight">
+                <div>
+                  <p class="label">Shared Notes</p>
+                  <h2 class="card-title">Plan together</h2>
+                </div>
+                <a href="/" class="btn btn-secondary btn-compact">
+                  Back to dashboard
+                </a>
+              </div>
+              <p class="shared-notes-intro">
+                A shared space for both profiles. Use this for haul ideas, buying plans, reminders, and collaborative planning.
+              </p>
+
+              <form
+                class="modal-form planning-form"
+                action="/shared-notes"
+                method="POST"
+                novalidate
+              >
+                <div class="form-group">
+                  <label for="noteTitle" class="form-label">
+                    Title<span class="required">*</span>
+                  </label>
+                  <input
+                    id="noteTitle"
+                    name="title"
+                    type="text"
+                    class="input"
+                    required
+                    autocomplete="off"
+                    placeholder="e.g. Next haul ideas, Budget reminder"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="noteBody" class="form-label">
+                    Note
+                  </label>
+                  <textarea
+                    id="noteBody"
+                    name="body"
+                    rows="4"
+                    class="input planning-textarea"
+                    placeholder="Add details, ideas, or reminders..."
+                  ></textarea>
+                </div>
+
+                <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary">
+                    Create note
+                  </button>
+                </div>
+              </form>
+            </div>
+          </section>
+
+          <section class="dashboard-section">
+            <div class="section-header">
+              <div>
+                <h3 class="section-title">All notes</h3>
+                <p class="section-subtitle">Sorted by most recently updated</p>
+              </div>
+            </div>
+
+            <% if (!notes || notes.length === 0) { %>
+              <p class="empty-state-text">
+                No shared notes yet. Create one above to start planning together.
+              </p>
+            <% } else { %>
+              <div class="shared-notes-list">
+                <% notes.forEach(function (note) { %>
+                  <article class="shared-note-card">
+                    <div class="shared-note-main">
+                      <h4 class="shared-note-title"><%= note.title || 'Untitled' %></h4>
+                      <% if (note.body) { %>
+                        <p class="shared-note-body"><%= note.body %></p>
+                      <% } %>
+                      <div class="shared-note-meta">
+                        <span class="shared-note-created">
+                          Created by <%= note.created_by_name || 'Unknown' %>
+                        </span>
+                        <% const wasEdited = note.last_edited_by !== note.created_by || (note.updated_at !== note.created_at); %>
+                        <% if (wasEdited) { %>
+                          <span class="shared-note-edited">
+                            Edited by <%= note.last_edited_by_name || 'Unknown' %>
+                          </span>
+                        <% } %>
+                        <span class="shared-note-time">
+                          <%= note.updated_at ? new Date(note.updated_at.replace(' ', 'T') + 'Z').toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '' %>
+                        </span>
+                      </div>
+                    </div>
+                    <div class="shared-note-actions">
+                      <button
+                        type="button"
+                        class="icon-button icon-button-small"
+                        title="Edit note"
+                        data-modal-target="#editNoteModal-<%= note.id %>"
+                      >
+                        ✎
+                      </button>
+                      <button
+                        type="button"
+                        class="icon-button icon-button-small icon-button-danger"
+                        title="Delete note"
+                        data-modal-target="#deleteNoteModal-<%= note.id %>"
+                      >
+                        🗑
+                      </button>
+                    </div>
+                  </article>
+
+                  <div
+                    id="editNoteModal-<%= note.id %>"
+                    class="modal-backdrop"
+                    aria-hidden="true"
+                    data-modal
+                  >
+                    <div
+                      class="modal"
+                      role="dialog"
+                      aria-modal="true"
+                      aria-labelledby="editNoteModalTitle-<%= note.id %>"
+                    >
+                      <div class="modal-header">
+                        <div>
+                          <p class="label">Edit note</p>
+                          <h2
+                            id="editNoteModalTitle-<%= note.id %>"
+                            class="modal-title"
+                          >
+                            <%= note.title || 'Untitled' %>
+                          </h2>
+                        </div>
+                        <button
+                          class="icon-button"
+                          type="button"
+                          aria-label="Close"
+                          data-modal-close
+                        >
+                          ✕
+                        </button>
+                      </div>
+
+                      <form
+                        class="modal-form"
+                        action="/shared-notes/<%= note.id %>/edit"
+                        method="POST"
+                      >
+                        <div class="form-group">
+                          <label
+                            for="editNoteTitle-<%= note.id %>"
+                            class="form-label"
+                          >
+                            Title<span class="required">*</span>
+                          </label>
+                          <input
+                            id="editNoteTitle-<%= note.id %>"
+                            name="title"
+                            type="text"
+                            class="input"
+                            required
+                            value="<%= note.title || '' %>"
+                          />
+                        </div>
+                        <div class="form-group">
+                          <label
+                            for="editNoteBody-<%= note.id %>"
+                            class="form-label"
+                          >
+                            Note
+                          </label>
+                          <textarea
+                            id="editNoteBody-<%= note.id %>"
+                            name="body"
+                            rows="4"
+                            class="input planning-textarea"
+                          ><%= note.body || '' %></textarea>
+                        </div>
+                        <div class="modal-footer">
+                          <button
+                            type="button"
+                            class="btn btn-ghost"
+                            data-modal-close
+                          >
+                            Cancel
+                          </button>
+                          <button type="submit" class="btn btn-primary">
+                            Save changes
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+
+                  <div
+                    id="deleteNoteModal-<%= note.id %>"
+                    class="modal-backdrop"
+                    aria-hidden="true"
+                    data-modal
+                  >
+                    <div
+                      class="modal"
+                      role="dialog"
+                      aria-modal="true"
+                      aria-labelledby="deleteNoteModalTitle-<%= note.id %>"
+                    >
+                      <div class="modal-header">
+                        <div>
+                          <p class="label">Delete note</p>
+                          <h2
+                            id="deleteNoteModalTitle-<%= note.id %>"
+                            class="modal-title"
+                          >
+                            <%= note.title || 'Untitled' %>
+                          </h2>
+                        </div>
+                        <button
+                          class="icon-button"
+                          type="button"
+                          aria-label="Close"
+                          data-modal-close
+                        >
+                          ✕
+                        </button>
+                      </div>
+
+                      <form
+                        class="modal-form"
+                        action="/shared-notes/<%= note.id %>/delete"
+                        method="POST"
+                      >
+                        <p class="empty-state-text">
+                          This will permanently remove this shared note. This cannot be undone.
+                        </p>
+                        <div class="modal-footer">
+                          <button
+                            type="button"
+                            class="btn btn-ghost"
+                            data-modal-close
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="submit"
+                            class="btn btn-primary btn-danger"
+                          >
+                            Delete note
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                <% }); %>
+              </div>
+            <% } %>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script src="/js/main.js"></script>
+  </body>
+</html>
