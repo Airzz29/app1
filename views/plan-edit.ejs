@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#050816" />
+    <title>Resell Tracker · Planning</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/jpeg" href="/icon.jpg" />
+    <link rel="apple-touch-icon" href="/icon.jpg" />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body class="app-body">
+    <div class="app-shell app-shell-visible">
+      <%- include('partials/header') %>
+
+      <main class="app-main">
+        <section class="dashboard">
+          <section class="dashboard-section">
+            <div class="card card-highlight">
+              <div class="section-header section-header-tight">
+                <div>
+                  <p class="label">Planning</p>
+                  <h2 class="card-title">Edit plan</h2>
+                </div>
+                <a href="/planning/<%= plan.id %>" class="btn btn-secondary btn-compact">
+                  Back
+                </a>
+              </div>
+
+              <form
+                class="modal-form planning-form planning-detail-form"
+                action="/planning/<%= plan.id %>"
+                method="POST"
+                novalidate
+              >
+                <div class="form-group">
+                  <label for="planTitle" class="form-label">
+                    Plan title<span class="required">*</span>
+                  </label>
+                  <input
+                    id="planTitle"
+                    name="title"
+                    type="text"
+                    class="input"
+                    required
+                    autocomplete="off"
+                    value="<%= plan.title %>"
+                  />
+                </div>
+
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="planTargetDate" class="form-label">
+                      Target date
+                    </label>
+                    <input
+                      id="planTargetDate"
+                      name="targetDate"
+                      type="date"
+                      class="input"
+                      value="<%= plan.target_date || '' %>"
+                    />
+                  </div>
+                </div>
+
+                <div class="planning-editor-grid">
+                  <div class="planning-editor-pane">
+                    <div class="planning-editor-header">
+                      <label for="planWhatToBuy" class="form-label">
+                        What to buy
+                      </label>
+                    </div>
+                    <div class="planning-toolbar" role="toolbar" aria-label="Formatting">
+                      <button type="button" class="planning-tool" data-format-action="h1" data-format-target="#planWhatToBuy">Heading</button>
+                      <button type="button" class="planning-tool" data-format-action="h2" data-format-target="#planWhatToBuy">Subheading</button>
+                      <button type="button" class="planning-tool" data-format-action="bullet" data-format-target="#planWhatToBuy">Bullet list</button>
+                      <button type="button" class="planning-tool" data-format-action="para" data-format-target="#planWhatToBuy">Paragraph</button>
+                      <button type="button" class="planning-tool" data-format-action="br" data-format-target="#planWhatToBuy">Line break</button>
+                    </div>
+                    <textarea
+                      id="planWhatToBuy"
+                      name="whatToBuy"
+                      rows="10"
+                      class="input planning-textarea planning-editor-textarea"
+                      data-planning-editor="whatToBuy"
+                      placeholder="Add items to buy..."
+                    ><%= plan.what_to_buy || '' %></textarea>
+                    <div class="planning-preview" data-planning-preview="whatToBuy"></div>
+                  </div>
+
+                  <div class="planning-editor-pane">
+                    <div class="planning-editor-header">
+                      <label for="planDetails" class="form-label">
+                        Notes
+                      </label>
+                    </div>
+                    <div class="planning-toolbar" role="toolbar" aria-label="Formatting">
+                      <button type="button" class="planning-tool" data-format-action="h1" data-format-target="#planDetails">Heading</button>
+                      <button type="button" class="planning-tool" data-format-action="h2" data-format-target="#planDetails">Subheading</button>
+                      <button type="button" class="planning-tool" data-format-action="bullet" data-format-target="#planDetails">Bullet list</button>
+                      <button type="button" class="planning-tool" data-format-action="para" data-format-target="#planDetails">Paragraph</button>
+                      <button type="button" class="planning-tool" data-format-action="br" data-format-target="#planDetails">Line break</button>
+                    </div>
+                    <textarea
+                      id="planDetails"
+                      name="details"
+                      rows="10"
+                      class="input planning-textarea planning-editor-textarea"
+                      data-planning-editor="details"
+                      placeholder="Add notes..."
+                    ><%= plan.details || '' %></textarea>
+                    <div class="planning-preview" data-planning-preview="details"></div>
+                  </div>
+                </div>
+
+                <div class="modal-footer planning-detail-footer">
+                  <a href="/planning/<%= plan.id %>" class="btn btn-ghost">
+                    Cancel
+                  </a>
+                  <button type="submit" class="btn btn-primary">
+                    Save changes
+                  </button>
+                </div>
+              </form>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/planning-editor.js"></script>
+  </body>
+</html>
+
