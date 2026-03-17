@@ -56,13 +56,22 @@
                   <label for="planWhatToBuy" class="form-label">
                     What to buy
                   </label>
+                  <div class="planning-toolbar" role="toolbar" aria-label="Formatting">
+                    <button type="button" class="planning-tool" data-format-action="h1" data-format-target="#planWhatToBuy">Heading</button>
+                    <button type="button" class="planning-tool" data-format-action="h2" data-format-target="#planWhatToBuy">Subheading</button>
+                    <button type="button" class="planning-tool" data-format-action="bullet" data-format-target="#planWhatToBuy">Bullet list</button>
+                    <button type="button" class="planning-tool" data-format-action="para" data-format-target="#planWhatToBuy">Paragraph</button>
+                    <button type="button" class="planning-tool" data-format-action="br" data-format-target="#planWhatToBuy">Line break</button>
+                  </div>
                   <textarea
                     id="planWhatToBuy"
                     name="whatToBuy"
                     rows="2"
-                    class="input planning-textarea"
-                    placeholder="e.g. 10x mid-tier sneakers, 5x vintage tees"
+                    class="input planning-textarea planning-editor-textarea"
+                    data-planning-editor="whatToBuy"
+                    placeholder="Add items to buy..."
                   ></textarea>
+                  <div class="planning-preview" data-planning-preview="whatToBuy"></div>
                 </div>
 
                 <div class="form-grid">
@@ -83,13 +92,22 @@
                   <label for="planDetails" class="form-label">
                     Notes
                   </label>
+                  <div class="planning-toolbar" role="toolbar" aria-label="Formatting">
+                    <button type="button" class="planning-tool" data-format-action="h1" data-format-target="#planDetails">Heading</button>
+                    <button type="button" class="planning-tool" data-format-action="h2" data-format-target="#planDetails">Subheading</button>
+                    <button type="button" class="planning-tool" data-format-action="bullet" data-format-target="#planDetails">Bullet list</button>
+                    <button type="button" class="planning-tool" data-format-action="para" data-format-target="#planDetails">Paragraph</button>
+                    <button type="button" class="planning-tool" data-format-action="br" data-format-target="#planDetails">Line break</button>
+                  </div>
                   <textarea
                     id="planDetails"
                     name="details"
                     rows="4"
-                    class="input planning-textarea"
-                    placeholder="Any extra details, sourcing spots, budget, etc."
+                    class="input planning-textarea planning-editor-textarea"
+                    data-planning-editor="details"
+                    placeholder="Add notes..."
                   ></textarea>
+                  <div class="planning-preview" data-planning-preview="details"></div>
                 </div>
 
                 <div class="modal-footer">
@@ -200,6 +218,7 @@
     </div>
 
     <script src="/js/main.js"></script>
+    <script src="/js/planning-editor.js"></script>
   </body>
 </html>
 
