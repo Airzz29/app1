@@ -793,18 +793,9 @@
           <ul class="planning-preview-list">
             <% plans.slice(0, 3).forEach(function (plan) { %>
               <li class="planning-preview-item">
-                <p class="planning-preview-title"><%= plan.title %></p>
-                <p class="planning-preview-meta">
-                  <% if (plan.target_date) { %>
-                    <span>Target: <%= plan.target_date %></span>
-                  <% } else { %>
-                    <span>No date</span>
-                  <% } %>
-                  <% if (plan.what_to_buy) { %>
-                    <span>&middot;</span>
-                    <span><%= plan.what_to_buy %></span>
-                  <% } %>
-                </p>
+                <a class="planning-preview-link" href="/planning/<%= plan.id %>">
+                  <span class="planning-preview-title"><%= plan.title %></span>
+                </a>
               </li>
             <% }); %>
           </ul>
