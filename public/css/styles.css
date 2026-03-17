@@ -2146,3 +2146,126 @@ input[type='file'].input::file-selector-button:hover {
   font-size: 0.85rem;
 }
 
+/* Planning: minimal title lists + detail editor */
+.planning-preview-link,
+.planning-title-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.planning-preview-link:hover .planning-preview-title,
+.planning-title-link:hover .haul-name {
+  text-decoration: underline;
+}
+
+.planning-preview-title {
+  font-weight: 600;
+}
+
+.planning-detail-form {
+  margin-top: 0.75rem;
+}
+
+.planning-editor-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+@media (min-width: 860px) {
+  .planning-editor-grid {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.planning-editor-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.planning-editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.planning-editor-hint {
+  font-size: 0.78rem;
+  color: #9ca3af;
+  white-space: nowrap;
+}
+
+@media (max-width: 520px) {
+  .planning-editor-hint {
+    display: none;
+  }
+}
+
+.planning-editor-textarea {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 220px;
+}
+
+.planning-preview {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid #1e293b;
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  color: #e5e7eb;
+  overflow-wrap: anywhere;
+}
+
+.planning-preview h1,
+.planning-preview h2,
+.planning-preview h3 {
+  margin: 0.6rem 0 0.35rem;
+  line-height: 1.25;
+}
+
+.planning-preview h1 {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.planning-preview h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #dbeafe;
+}
+
+.planning-preview h3 {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #e0f2fe;
+}
+
+.planning-preview p {
+  margin: 0.35rem 0;
+  color: #d1d5db;
+  font-size: 0.9rem;
+}
+
+.planning-preview ul {
+  margin: 0.4rem 0 0.4rem 1.1rem;
+  padding: 0;
+  color: #d1d5db;
+  font-size: 0.9rem;
+}
+
+.planning-preview li {
+  margin: 0.2rem 0;
+}
+
+.planning-detail-footer {
+  margin-top: 0.75rem;
+}
+
