@@ -336,6 +336,19 @@ function getPlans(profileId) {
   });
 }
 
+function getPlanByIdForProfile(planId, profileId) {
+  return new Promise((resolve, reject) => {
+    db.get(
+      'SELECT * FROM plans WHERE id = ? AND profile_id = ?',
+      [planId, profileId],
+      (err, row) => {
+        if (err) return reject(err);
+        resolve(row || null);
+      },
+    );
+  });
+}
+
 function createPlan({ title, whatToBuy, targetDate, details, profileId }) {
   return new Promise((resolve, reject) => {
     const stmt = db.prepare(
@@ -350,6 +363,29 @@ function createPlan({ title, whatToBuy, targetDate, details, profileId }) {
       function onRun(err) {
         if (err) return reject(err);
         resolve(this.lastID);
+      },
+    );
+    stmt.finalize();
+  });
+}
+
+function updatePlanForProfile(planId, profileId, { title, whatToBuy, targetDate, details }) {
+  return new Promise((resolve, reject) => {
+    const stmt = db.prepare(
+      `UPDATE plans
+       SET title = ?, what_to_buy = ?, target_date = ?, details = ?
+       WHERE id = ? AND profile_id = ?`,
+    );
+    stmt.run(
+      title.trim(),
+      whatToBuy ? String(whatToBuy) : null,
+      targetDate || null,
+      details ? String(details) : null,
+      planId,
+      profileId,
+      (err) => {
+        if (err) return reject(err);
+        resolve();
       },
     );
     stmt.finalize();
@@ -1334,6 +1370,20 @@ app.get('/planning', async (req, res) => {
   }
 });
 
+app.get('/planning/:id', async (req, res) => {
+  const profileId = getProfileIdFromRequest(req);
+  if (!profileId) return res.redirect('/profiles');
+  const planId = parseInt(req.params.id, 10);
+  if (Number.isNaN(planId)) return res.redirect('/planning');
+  try {
+    const plan = await getPlanByIdForProfile(planId, profileId);
+    if (!plan) return res.redirect('/planning');
+    res.render('plan-detail', { plan });
+  } catch (err) {
+    res.status(500).send('Database error');
+  }
+});
+
 app.post('/planning', async (req, res) => {
   const profileId = getProfileIdFromRequest(req);
   if (!profileId) return res.redirect('/profiles');
@@ -1355,6 +1405,28 @@ app.post('/planning', async (req, res) => {
   }
 
   res.redirect('/planning');
+});
+
+app.post('/planning/:id', async (req, res) => {
+  const profileId = getProfileIdFromRequest(req);
+  if (!profileId) return res.redirect('/profiles');
+  const planId = parseInt(req.params.id, 10);
+  if (Number.isNaN(planId)) return res.redirect('/planning');
+  const { title, whatToBuy, targetDate, details } = req.body || {};
+  if (!title || !String(title).trim()) {
+    return res.redirect(`/planning/${planId}`);
+  }
+  try {
+    await updatePlanForProfile(planId, profileId, {
+      title: String(title),
+      whatToBuy: whatToBuy != null ? String(whatToBuy) : null,
+      targetDate: targetDate || null,
+      details: details != null ? String(details) : null,
+    });
+  } catch (err) {
+    // ignore
+  }
+  res.redirect(`/planning/${planId}`);
 });
 
 app.post('/planning/:id/delete', async (req, res) => {
