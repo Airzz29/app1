@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#050816" />
+    <title>Resell Tracker · Haul #<%= haul.id %></title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/jpeg" href="/icon.jpg" />
+    <link rel="apple-touch-icon" href="/icon.jpg" />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body class="app-body">
+    <div class="app-shell app-shell-visible">
+      <%- include('partials/header') %>
+
+      <main class="app-main">
+        <section class="dashboard">
+          <section class="dashboard-section">
+            <div class="card card-highlight">
+              <div class="section-header section-header-tight">
+                <div>
+                  <p class="label">Haul</p>
+                  <h2 class="card-title"><%= haul.name %></h2>
+                </div>
+                <a href="/" class="btn btn-secondary btn-compact">
+                  Back to dashboard
+                </a>
+              </div>
+
+              <div class="haul-details-grid">
+                <div class="haul-details-main">
+                  <p class="metric-label">Haul ID</p>
+                  <p class="stat-value">#<%= haul.id %></p>
+                  <p class="metric-label">Genre</p>
+                  <p class="stat-value"><%= haul.genre || '—' %></p>
+                </div>
+                <div class="haul-details-stats">
+                  <div class="wallet-summary-row">
+                    <span>Items</span>
+                    <span><%= totalItems != null ? totalItems : '—' %></span>
+                  </div>
+                  <div class="wallet-summary-row">
+                    <span>Sold</span>
+                    <span><%= soldCount %></span>
+                  </div>
+                  <div class="wallet-summary-row">
+                    <span>Unsold</span>
+                    <span><%= unsoldCount %></span>
+                  </div>
+                  <div class="wallet-summary-row">
+                    <span>Revenue</span>
+                    <span>$<%= totalRevenue.toFixed(2) %></span>
+                  </div>
+                  <div class="wallet-summary-row">
+                    <span>Profit</span>
+                    <span>$<%= totalProfit.toFixed(2) %></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="dashboard-section">
+            <div class="section-header">
+              <h3 class="section-title">Sold items</h3>
+            </div>
+            <form class="tools-filters" method="GET" action="/hauls/<%= haul.id %>">
+              <div class="tools-filters-main">
+                <input
+                  type="text"
+                  name="q"
+                  data-sold-search="haul"
+                  value="<%= query || '' %>"
+                  placeholder="Search sold items by name or platform"
+                  class="input"
+                  autocomplete="off"
+                />
+              </div>
+              <div class="tools-filters-side">
+                <button type="submit" class="btn btn-secondary btn-compact">
+                  Search
+                </button>
+              </div>
+            </form>
+
+            <% if (!soldItems || soldItems.length === 0) { %>
+              <p class="empty-state-text">
+                No sold items recorded for this haul yet.
+              </p>
+            <% } else { %>
+              <ul class="wallet-list">
+                <% soldItems.forEach(function (sale) { %>
+                  <li
+                    class="wallet-item sold-item-card"
+                    data-sold-text="<%= (sale.item_name || '') + ' ' + (sale.platform || '') %>"
+                  >
+                    <div class="wallet-item-main">
+                      <% if (sale.image_path) { %>
+                        <div class="sold-item-thumb">
+                          <img
+                            src="<%= sale.image_path %>"
+                            alt="Sold item image"
+                            loading="lazy"
+                          />
+                        </div>
+                      <% } %>
+                      <p class="wallet-item-title">
+                        <span class="wallet-amount wallet-amount-credit">
+                          $<%= (sale.sold_price || 0).toFixed(2) %>
+                        </span>
+                        <span class="wallet-type">
+                          <%= sale.item_name || 'Item' %>
+                        </span>
+                      </p>
+                      <p class="wallet-item-desc">
+                        <% if (sale.platform) { %>
+                          Sold on <%= sale.platform %>
+                        <% } else { %>
+                          Sold item
+                        <% } %>
+                      </p>
+                      <p class="wallet-item-meta">
+                        <% if (sale.tracking_code && (sale.platform === 'Depop' || sale.platform === 'eBay')) { %>
+                          <span>Tracking: <%= sale.tracking_code %></span>
+                          <% if (sale.sold_at) { %>
+                            <span>&middot;</span>
+                          <% } %>
+                        <% } %>
+                        <% if (sale.sold_at) { %>
+                          <span><%= sale.sold_at %></span>
+                        <% } %>
+                      </p>
+                      <div class="sold-item-actions">
+                        <button
+                          type="button"
+                          class="btn btn-secondary btn-compact"
+                          data-modal-target="#soldInfoModal-<%= sale.id %>"
+                        >
+                          Show more information
+                        </button>
+                      </div>
+                    </div>
+                  </li>
+
+                  <div
+                    id="soldInfoModal-<%= sale.id %>"
+                    class="modal-backdrop"
+                    aria-hidden="true"
+                    data-modal
+                  >
+                    <div
+                      class="modal"
+                      role="dialog"
+                      aria-modal="true"
+                      aria-labelledby="soldInfoTitle-<%= sale.id %>"
+                    >
+                      <div class="modal-header">
+                        <div>
+                          <p class="label">Sold item</p>
+                          <h2
+                            id="soldInfoTitle-<%= sale.id %>"
+                            class="modal-title"
+                          >
+                            <%= sale.item_name || 'Item' %>
+                          </h2>
+                        </div>
+                        <button
+                          class="icon-button"
+                          type="button"
+                          aria-label="Close"
+                          data-modal-close
+                        >
+                          ✕
+                        </button>
+                      </div>
+
+                      <div class="modal-body">
+                        <% if (sale.image_path) { %>
+                          <div class="sold-info-image">
+                            <img
+                              src="<%= sale.image_path %>"
+                              alt="Sold item image"
+                              loading="lazy"
+                            />
+                          </div>
+                        <% } %>
+
+                        <div class="sold-info-grid">
+                          <div class="sold-info-row">
+                            <span class="sold-info-label">Price</span>
+                            <span class="sold-info-value">
+                              $<%= (sale.sold_price || 0).toFixed(2) %>
+                            </span>
+                          </div>
+                          <% if (sale.platform) { %>
+                            <div class="sold-info-row">
+                              <span class="sold-info-label">Platform</span>
+                              <span class="sold-info-value">
+                                <%= sale.platform %>
+                              </span>
+                            </div>
+                          <% } %>
+                          <% if (sale.sold_at) { %>
+                            <div class="sold-info-row">
+                              <span class="sold-info-label">Date sold</span>
+                              <span class="sold-info-value">
+                                <%= sale.sold_at %>
+                              </span>
+                            </div>
+                          <% } %>
+                          <% if (sale.selling_account) { %>
+                            <div class="sold-info-row">
+                              <span class="sold-info-label">Account used</span>
+                              <span class="sold-info-value">
+                                <%= sale.selling_account %>
+                              </span>
+                            </div>
+                          <% } %>
+                          <% if (sale.buyer_name) { %>
+                            <div class="sold-info-row">
+                              <span class="sold-info-label">Buyer / user</span>
+                              <span class="sold-info-value">
+                                <%= sale.buyer_name %>
+                              </span>
+                            </div>
+                          <% } %>
+                          <% if (sale.tracking_code && (sale.platform === 'Depop' || sale.platform === 'eBay')) { %>
+                            <div class="sold-info-row">
+                              <span class="sold-info-label">Tracking</span>
+                              <div class="sold-info-value sold-info-tracking">
+                                <span class="sold-info-tracking-code">
+                                  <%= sale.tracking_code %>
+                                </span>
+                                <button
+                                  type="button"
+                                  class="btn btn-secondary btn-compact sold-copy-btn"
+                                  data-copy-tracking="<%= sale.tracking_code %>"
+                                >
+                                  Copy
+                                </button>
+                              </div>
+                            </div>
+                          <% } %>
+                        </div>
+                      </div>
+
+                      <div class="modal-footer">
+                        <button
+                          type="button"
+                          class="btn btn-ghost"
+                          data-modal-close
+                        >
+                          Close
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                <% }); %>
+              </ul>
+            <% } %>
+          </section>
+
+          <section class="dashboard-section">
+            <div class="section-header">
+              <h3 class="section-title">Unsold items</h3>
+            </div>
+            <% if (unsoldCount <= 0) { %>
+              <p class="empty-state-text">
+                There are no unsold items remaining in this haul.
+              </p>
+            <% } else { %>
+              <ul class="not-sold-list">
+                <% for (var i = 1; i <= unsoldCount; i++) { %>
+                  <li class="not-sold-item">
+                    <span class="not-sold-label">Unsold item <%= i %></span>
+                    <span class="not-sold-meta">
+                      From haul "<%= haul.name %>"
+                    </span>
+                  </li>
+                <% } %>
+              </ul>
+            <% } %>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script src="/js/main.js"></script>
+  </body>
+</html>
+

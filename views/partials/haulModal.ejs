@@ -1,0 +1,126 @@
+<div id="haulModal" class="modal-backdrop" aria-hidden="true" data-modal>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="haulModalTitle">
+    <div class="modal-header">
+      <div>
+        <p class="label">New haul</p>
+        <h2 id="haulModalTitle" class="modal-title">Add haul</h2>
+      </div>
+      <button class="icon-button" type="button" aria-label="Close" data-modal-close>
+        ✕
+      </button>
+    </div>
+
+    <form
+      class="modal-form"
+      action="/hauls"
+      method="POST"
+      enctype="multipart/form-data"
+      novalidate
+    >
+      <div class="form-group">
+        <label for="haulName" class="form-label">Haul name<span class="required">*</span></label>
+        <input
+          id="haulName"
+          name="haulName"
+          type="text"
+          class="input"
+          required
+          autocomplete="off"
+          placeholder="e.g. Spring sneaker drop"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="genre" class="form-label">Genre</label>
+        <input
+          id="genre"
+          name="genre"
+          type="text"
+          class="input"
+          autocomplete="off"
+          placeholder="e.g. Sneakers, Vinyl, Tech"
+        />
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="itemCount" class="form-label">Items</label>
+          <input
+            id="itemCount"
+            name="itemCount"
+            type="number"
+            min="0"
+            inputmode="numeric"
+            class="input"
+            placeholder="e.g. 20"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="durationDays" class="form-label">Sell days</label>
+          <input
+            id="durationDays"
+            name="durationDays"
+            type="number"
+            min="0"
+            inputmode="numeric"
+            class="input"
+            placeholder="e.g. 14"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="cost" class="form-label">Cost (total)</label>
+        <div class="input-with-prefix">
+          <span class="input-prefix">$</span>
+          <input
+            id="cost"
+            name="cost"
+            type="number"
+            min="0"
+            step="0.01"
+            inputmode="decimal"
+            class="input input-no-padding-left"
+            placeholder="e.g. 350.00"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="trackingNumber" class="form-label">Tracking number</label>
+        <input
+          id="trackingNumber"
+          name="trackingNumber"
+          type="text"
+          class="input"
+          autocomplete="off"
+          placeholder="e.g. Australia Post tracking (optional)"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="haulImage" class="form-label">
+          Haul image
+        </label>
+        <input
+          id="haulImage"
+          name="haulImage"
+          type="file"
+          accept="image/*"
+          class="input"
+        />
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" data-modal-close>
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-primary">
+          Save haul
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+

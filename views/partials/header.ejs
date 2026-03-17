@@ -1,0 +1,36 @@
+<header class="app-header">
+  <div class="app-header-left">
+    <div class="app-logo">RT</div>
+    <div class="app-title-block">
+      <h1 class="app-title">Selling Dashboard</h1>
+      <p class="app-subtitle">Track and optimise your hauls</p>
+    </div>
+  </div>
+  <div class="app-header-right">
+    <nav class="app-header-actions">
+      <% if (currentProfile) { %>
+        <form action="/profiles/logout" method="POST" class="profile-pill-form">
+          <span class="profile-pill">
+            <span class="profile-pill-avatar">
+              <%= currentProfile.name.charAt(0).toUpperCase() %>
+            </span>
+            <span class="profile-pill-name"><%= currentProfile.name %></span>
+          </span>
+          <button type="submit" class="btn btn-secondary btn-compact">
+            Selling dashboard
+          </button>
+        </form>
+      <% } %>
+      <a href="/planning" class="btn btn-secondary btn-compact">
+        Planning
+      </a>
+      <button
+        class="btn btn-primary btn-compact"
+        data-modal-target="#haulModal"
+        type="button"
+      >
+        Add haul
+      </button>
+    </nav>
+  </div>
+</header>

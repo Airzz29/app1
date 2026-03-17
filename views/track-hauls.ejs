@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#050816" />
+    <title>Resell Tracker · Track Hauls</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/jpeg" href="/icon.jpg" />
+    <link rel="apple-touch-icon" href="/icon.jpg" />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body class="app-body">
+    <div class="app-shell app-shell-visible">
+      <%- include('partials/header') %>
+
+      <main class="app-main">
+        <section class="dashboard">
+          <section class="dashboard-section">
+            <div class="card card-highlight">
+              <div class="section-header section-header-tight">
+                <div>
+                  <p class="label">Track Hauls</p>
+                  <h2 class="card-title">Active hauls & tracking</h2>
+                </div>
+                <a href="/" class="btn btn-secondary btn-compact">
+                  Back to dashboard
+                </a>
+              </div>
+              <p class="track-hauls-intro">
+                View your active hauls and open Australia Post tracking in one place. Add or edit tracking numbers from the dashboard or via Edit Tracking below.
+              </p>
+            </div>
+          </section>
+
+          <section class="dashboard-section track-hauls-tabs-section">
+            <div class="track-hauls-tabs" role="tablist">
+              <button
+                type="button"
+                class="track-hauls-tab track-hauls-tab-active"
+                role="tab"
+                aria-selected="true"
+                data-track-tab="active"
+                id="tab-active"
+              >
+                Active
+                <% if (activeTrackedHauls && activeTrackedHauls.length > 0) { %>
+                  <span class="track-hauls-tab-count"><%= activeTrackedHauls.length %></span>
+                <% } %>
+              </button>
+              <button
+                type="button"
+                class="track-hauls-tab"
+                role="tab"
+                aria-selected="false"
+                data-track-tab="finished"
+                id="tab-finished"
+              >
+                Finished
+                <% if (finishedTrackedHauls && finishedTrackedHauls.length > 0) { %>
+                  <span class="track-hauls-tab-count"><%= finishedTrackedHauls.length %></span>
+                <% } %>
+              </button>
+            </div>
+
+            <div class="track-hauls-panel track-hauls-panel-active" id="panel-active" role="tabpanel" aria-labelledby="tab-active">
+              <% if (!activeTrackedHauls || activeTrackedHauls.length === 0) { %>
+                <div class="empty-state-card">
+                  <p class="empty-state-title">No active hauls</p>
+                  <p class="empty-state-text">
+                    You don’t have any active hauls in this list. Add a haul on the dashboard, or move one back from Finished.
+                  </p>
+                  <a href="/" class="btn btn-primary">Go to dashboard</a>
+                </div>
+              <% } else { %>
+                <div class="track-hauls-grid">
+                  <% activeTrackedHauls.forEach(function (haul) { %>
+                    <%- include('partials/trackHaulCard', { haul, isFinished: false }) %>
+                  <% }); %>
+                </div>
+              <% } %>
+            </div>
+
+            <div class="track-hauls-panel" id="panel-finished" role="tabpanel" aria-labelledby="tab-finished" hidden>
+              <% if (!finishedTrackedHauls || finishedTrackedHauls.length === 0) { %>
+                <div class="empty-state-card">
+                  <p class="empty-state-title">No finished hauls</p>
+                  <p class="empty-state-text">
+                    When you mark a haul as finished from the Active tab, it will appear here.
+                  </p>
+                </div>
+              <% } else { %>
+                <div class="track-hauls-grid">
+                  <% finishedTrackedHauls.forEach(function (haul) { %>
+                    <%- include('partials/trackHaulCard', { haul, isFinished: true }) %>
+                  <% }); %>
+                </div>
+              <% } %>
+            </div>
+          </section>
+        </section>
+
+        <% const allTrackedHauls = [].concat(activeTrackedHauls || [], finishedTrackedHauls || []); %>
+        <% if (allTrackedHauls.length > 0) { %>
+          <% allTrackedHauls.forEach(function (haul) { %>
+            <%- include('partials/editHaulModal', { haul, from: 'track-hauls' }) %>
+          <% }); %>
+        <% } %>
+      </main>
+    </div>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/track-hauls.js"></script>
+  </body>
+</html>

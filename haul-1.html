@@ -1,0 +1,80 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#050816" />
+    <title>Resell Tracker · Choose profile</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/jpeg" href="/icon.jpg" />
+    <link rel="apple-touch-icon" href="/icon.jpg" />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body class="app-body">
+    <div class="app-shell app-shell-visible app-shell-profiles">
+      <header class="app-header app-header-centered">
+        <div class="app-header-left">
+          <div class="app-logo app-logo-splash">RT</div>
+          <div class="app-title-block">
+            <h1 class="app-title">Resell Tracker</h1>
+            <p class="app-subtitle">Select a profile to continue</p>
+          </div>
+        </div>
+      </header>
+
+      <main class="app-main">
+        <section class="dashboard-section">
+          <div class="card card-highlight profiles-card">
+            <p class="label">Profiles</p>
+            <h2 class="card-title">Who&apos;s reselling?</h2>
+            <p class="empty-state-text">
+              Choose a profile below. Each profile keeps hauls, sales, planning,
+              todos, and issues completely separate.
+            </p>
+
+            <div class="profiles-grid">
+              
+                <a
+                  href="/profiles/1/login"
+                  class="profile-tile"
+                >
+                  <div class="profile-avatar">
+                    <span>B</span>
+                  </div>
+                  <div class="profile-info">
+                    <p class="profile-name">Beric</p>
+                    <p class="profile-meta">
+                      Personalised hauls, stats & planning
+                    </p>
+                  </div>
+                </a>
+              
+                <a
+                  href="/profiles/2/login"
+                  class="profile-tile"
+                >
+                  <div class="profile-avatar">
+                    <span>A</span>
+                  </div>
+                  <div class="profile-info">
+                    <p class="profile-name">Ayaan</p>
+                    <p class="profile-meta">
+                      Personalised hauls, stats & planning
+                    </p>
+                  </div>
+                </a>
+              
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/js/main.js"></script>
+  </body>
+</html>
+
+

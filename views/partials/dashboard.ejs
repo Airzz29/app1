@@ -1,0 +1,865 @@
+<section class="dashboard">
+  <% const hasActive = activeHauls && activeHauls.length > 0; %>
+
+  <section class="dashboard-section dashboard-section-top">
+    <div class="card card-highlight dashboard-metrics-card">
+      <div class="section-header section-header-tight">
+        <div>
+          <p class="label">Resell Tracker</p>
+          <h2 class="card-title">Business overview</h2>
+        </div>
+        <button
+          class="btn btn-secondary btn-compact"
+          type="button"
+          data-modal-target="#haulModal"
+        >
+          Add haul
+        </button>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric">
+          <p class="metric-label">Items sold · 30d</p>
+          <p class="metric-value"><%= stats.itemsSoldLast30Days %></p>
+        </div>
+        <div class="metric">
+          <p class="metric-label">Weekly revenue</p>
+          <p class="metric-value">
+            $<%= stats.weeklyRevenue.toFixed(2) %>
+          </p>
+        </div>
+        <div class="metric">
+          <p class="metric-label">Weekly profit</p>
+          <p class="metric-value metric-value-good">
+            $<%= stats.weeklyProfit.toFixed(2) %>
+          </p>
+        </div>
+        <div class="metric">
+          <p class="metric-label">Active hauls</p>
+          <p class="metric-value"><%= stats.totalActiveHauls %></p>
+        </div>
+        <div class="metric">
+          <p class="metric-label">Items left to sell</p>
+          <p class="metric-value"><%= stats.itemsLeftTotal %></p>
+        </div>
+        <div class="metric metric-subtle">
+          <p class="metric-label">Lifetime profit</p>
+          <p class="metric-value">
+            $<%= stats.totalProfit.toFixed(2) %>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="dashboard-section dashboard-main-layout">
+    <div class="dashboard-column">
+      <% if (walletSummary) { %>
+        <div class="card wallet-card">
+          <a href="/wallet" class="wallet-card-link">
+            <div class="wallet-card-header">
+              <p class="label">Wallet</p>
+              <span class="wallet-card-chevron">›</span>
+            </div>
+            <p class="wallet-card-balance" data-wallet-balance>
+              $<%= walletSummary.balance.toFixed(2) %>
+            </p>
+          </a>
+        </div>
+      <% } %>
+
+      <% if (!hasActive) { %>
+        <div class="empty-state-card">
+          <p class="empty-state-title">No active hauls</p>
+          <p class="empty-state-text">
+            You do not have any active hauls yet. Start one to see your live stats.
+          </p>
+          <button
+            class="btn btn-primary"
+            type="button"
+            data-modal-target="#haulModal"
+          >
+            Add haul
+          </button>
+        </div>
+      <% } else { %>
+        <div class="section-header">
+          <h3 class="section-title">Active hauls</h3>
+        </div>
+
+        <div class="haul-list">
+          <% activeHauls.forEach(function (haul) { %>
+            <article class="haul-row haul-row-card">
+              <div class="haul-row-main">
+                <% if (haul.cover_image) { %>
+                  <div class="haul-image-thumb">
+                    <img
+                      src="<%= haul.cover_image %>"
+                      alt="Haul image"
+                      loading="lazy"
+                    />
+                  </div>
+                <% } %>
+                <p class="haul-name"><%= haul.name %></p>
+                <p class="haul-meta">
+                  <span>#<%= haul.id %></span>
+                  <% if (haul.genre) { %>
+                    <span>&middot;</span>
+                    <span><%= haul.genre %></span>
+                  <% } %>
+                </p>
+
+                <div class="haul-progress">
+                  <% if (haul.totalItems != null) { %>
+                    <div class="progress-bar">
+                      <% const total = haul.totalItems || 0; %>
+                      <% const sold = haul.soldCount || 0; %>
+                      <% const pct = total > 0 ? Math.min(100, Math.round((sold / total) * 100)) : 0; %>
+                      <div
+                        class="progress-fill"
+                        style="width: <%= pct %>%"
+                      ></div>
+                    </div>
+                    <p class="haul-progress-label">
+                      Items sold: <strong><%= haul.soldCount %></strong>/<%= haul.totalItems %>
+                      <% if (haul.itemsLeft != null && haul.itemsLeft > 0) { %>
+                        · <span><%= haul.itemsLeft %> left</span>
+                      <% } %>
+                    </p>
+                  <% } else { %>
+                    <p class="haul-progress-label haul-progress-label-muted">
+                      Items sold: <strong><%= haul.soldCount %></strong>
+                    </p>
+                  <% } %>
+
+                  <% if (haul.endAtIso) { %>
+                    <p class="haul-progress-label haul-progress-label-muted">
+                      <span
+                        class="countdown countdown-haul"
+                        data-countdown-end="<%= haul.endAtIso %>"
+                        data-reload-on-expire="true"
+                      >
+                        Calculating…
+                      </span>
+                    </p>
+                  <% } %>
+                </div>
+              </div>
+
+              <div class="haul-row-stats haul-row-stats-vertical">
+                <span class="pill">
+                  <span class="pill-label">Revenue</span>
+                  <span>$<%= haul.revenue.toFixed(2) %></span>
+                </span>
+                <span class="pill">
+                  <span class="pill-label">Profit</span>
+                  <span>$<%= haul.profit.toFixed(2) %></span>
+                </span>
+                <% if (haul.totalItems != null) { %>
+                  <span class="pill">
+                    <span class="pill-label">Items</span>
+                    <span><%= haul.totalItems %></span>
+                  </span>
+                <% } %>
+              </div>
+
+              <div class="haul-actions">
+                <button
+                  type="button"
+                  class="icon-button icon-button-small"
+                  title="Mark sold"
+                  data-modal-target="#soldModal-<%= haul.id %>"
+                >
+                  ✓
+                </button>
+                <button
+                  type="button"
+                  class="icon-button icon-button-small"
+                  title="Edit haul"
+                  data-modal-target="#editModal-<%= haul.id %>"
+                >
+                  ✎
+                </button>
+                <a
+                  href="/hauls/<%= haul.id %>"
+                  class="icon-button icon-button-small"
+                  title="View haul details"
+                >
+                  🔍
+                </a>
+                <button
+                  type="button"
+                  class="icon-button icon-button-small icon-button-danger"
+                  title="Delete haul"
+                  data-modal-target="#deleteModal-<%= haul.id %>"
+                >
+                  🗑
+                </button>
+              </div>
+            </article>
+
+            <div
+              id="soldModal-<%= haul.id %>"
+              class="modal-backdrop"
+              aria-hidden="true"
+              data-modal
+            >
+              <div
+                class="modal"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="soldModalTitle-<%= haul.id %>"
+              >
+                <div class="modal-header">
+                  <div>
+                    <p class="label">Mark sold</p>
+                    <h2
+                      id="soldModalTitle-<%= haul.id %>"
+                      class="modal-title"
+                    >
+                      <%= haul.name %>
+                    </h2>
+                  </div>
+                  <button
+                    class="icon-button"
+                    type="button"
+                    aria-label="Close"
+                    data-modal-close
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <form
+                  class="modal-form"
+                  action="/hauls/<%= haul.id %>/sales"
+                  method="POST"
+                  enctype="multipart/form-data"
+                  novalidate
+                >
+                  <div class="form-group">
+                    <label class="form-label" for="itemName-<%= haul.id %>">
+                      Item name
+                    </label>
+                    <input
+                      id="itemName-<%= haul.id %>"
+                      name="itemName"
+                      type="text"
+                      class="input"
+                      placeholder="e.g. Jordan 4 Oreo"
+                      autocomplete="off"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="platform-<%= haul.id %>">
+                      Platform
+                    </label>
+                    <select
+                      id="platform-<%= haul.id %>"
+                      name="platform"
+                      class="input"
+                    >
+                      <option value="">Select platform</option>
+                      <option value="Marketplace">Facebook Marketplace</option>
+                      <option value="Depop">Depop</option>
+                      <option value="eBay">eBay</option>
+                      <option value="Gumtree">Gumtree</option>
+                      <option value="Vinted">Vinted</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+
+                  <div class="form-grid">
+                    <div class="form-group">
+                      <label class="form-label" for="soldPrice-<%= haul.id %>">
+                        Sold price
+                      </label>
+                      <div class="input-with-prefix">
+                        <span class="input-prefix">$</span>
+                        <input
+                          id="soldPrice-<%= haul.id %>"
+                          name="soldPrice"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          inputmode="decimal"
+                          class="input input-no-padding-left"
+                          placeholder="e.g. 120.00"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" for="itemCost-<%= haul.id %>">
+                        Item cost
+                      </label>
+                      <div class="input-with-prefix">
+                        <span class="input-prefix">$</span>
+                        <input
+                          id="itemCost-<%= haul.id %>"
+                          name="itemCost"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          inputmode="decimal"
+                          class="input input-no-padding-left"
+                          placeholder="Optional"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    class="form-group sold-tracking-group"
+                    style="display: none;"
+                  >
+                    <label
+                      class="form-label"
+                      for="trackingCode-<%= haul.id %>"
+                    >
+                      Tracking code
+                    </label>
+                    <input
+                      id="trackingCode-<%= haul.id %>"
+                      name="trackingCode"
+                      type="text"
+                      class="input"
+                      autocomplete="off"
+                      placeholder="e.g. tracking number for Depop or eBay"
+                    />
+                  </div>
+
+                  <div class="form-grid">
+                    <div class="form-group">
+                      <label class="form-label" for="sellingAccount-<%= haul.id %>">
+                        Selling account
+                      </label>
+                      <input
+                        id="sellingAccount-<%= haul.id %>"
+                        name="sellingAccount"
+                        type="text"
+                        class="input"
+                        placeholder="e.g. @resell.main, marketplace profile"
+                        autocomplete="off"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" for="buyerName-<%= haul.id %>">
+                        Buyer / user
+                      </label>
+                      <input
+                        id="buyerName-<%= haul.id %>"
+                        name="buyerName"
+                        type="text"
+                        class="input"
+                        placeholder="e.g. John Smith, @buyer123"
+                        autocomplete="off"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label
+                      class="form-label"
+                      for="itemImage-<%= haul.id %>"
+                    >
+                      Item image
+                    </label>
+                    <input
+                      id="itemImage-<%= haul.id %>"
+                      name="itemImage"
+                      type="file"
+                      accept="image/*"
+                      class="input"
+                    />
+                  </div>
+
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-ghost"
+                      data-modal-close
+                    >
+                      Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                      Save sale
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <%- include('editHaulModal', { haul }) %>
+
+            <div
+              id="deleteModal-<%= haul.id %>"
+              class="modal-backdrop"
+              aria-hidden="true"
+              data-modal
+            >
+              <div
+                class="modal"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="deleteModalTitle-<%= haul.id %>"
+              >
+                <div class="modal-header">
+                  <div>
+                    <p class="label">Delete haul</p>
+                    <h2
+                      id="deleteModalTitle-<%= haul.id %>"
+                      class="modal-title"
+                    >
+                      <%= haul.name %>
+                    </h2>
+                  </div>
+                  <button
+                    class="icon-button"
+                    type="button"
+                    aria-label="Close"
+                    data-modal-close
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <form
+                  class="modal-form"
+                  action="/hauls/<%= haul.id %>/delete"
+                  method="POST"
+                >
+                  <p class="empty-state-text">
+                    This will remove the haul and its sales history. This action
+                    cannot be undone.
+                  </p>
+
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-ghost"
+                      data-modal-close
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      class="btn btn-primary btn-danger"
+                    >
+                      Delete haul
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      <% } %>
+
+      <% if (previousHauls && previousHauls.length > 0) { %>
+        <div class="dashboard-section previous-hauls-section">
+          <div class="section-header">
+            <h3 class="section-title">Previous hauls</h3>
+          </div>
+
+          <div class="haul-list haul-list-subtle" id="previousHaulsList">
+            <% previousHauls.forEach(function (haul, index) { %>
+              <article
+                class="haul-row haul-row-previous <%= index >= 5 ? 'previous-haul-hidden' : '' %>"
+                data-previous-index="<%= index %>"
+              >
+                <div class="haul-row-main">
+                  <p class="haul-name"><%= haul.name %></p>
+                  <p class="haul-meta">
+                    <span>#<%= haul.id %></span>
+                    <% if (haul.genre) { %>
+                      <span>&middot;</span>
+                      <span><%= haul.genre %></span>
+                    <% } %>
+                    <span>&middot;</span>
+                    <span>Sold out</span>
+                  </p>
+                  <p class="haul-progress-label haul-progress-label-muted">
+                    Items sold: <strong><%= haul.soldCount %></strong>/<%= haul.totalItems %>
+                  </p>
+                </div>
+                <div class="haul-row-stats haul-row-stats-vertical">
+                  <span class="pill pill-muted">
+                    <span class="pill-label">Revenue</span>
+                    <span>$<%= haul.revenue.toFixed(2) %></span>
+                  </span>
+                  <span class="pill pill-muted">
+                    <span class="pill-label">Profit</span>
+                    <span>$<%= haul.profit.toFixed(2) %></span>
+                  </span>
+                </div>
+              </article>
+            <% }); %>
+          </div>
+
+          <% if (previousHauls.length > 5) { %>
+            <div class="previous-hauls-more">
+              <button
+                type="button"
+                class="btn btn-secondary btn-compact"
+                id="previousHaulsLoadMore"
+                data-previous-load-more
+              >
+                Load more
+              </button>
+            </div>
+          <% } %>
+        </div>
+      <% } %>
+
+      <% if (expiredHauls && expiredHauls.length > 0) { %>
+        <div class="dashboard-section previous-hauls-section">
+          <div class="section-header">
+            <h3 class="section-title">Not sold items</h3>
+          </div>
+
+          <div class="haul-list haul-list-subtle">
+            <% expiredHauls.forEach(function (haul) { %>
+              <article class="haul-row haul-row-previous">
+                <div class="haul-row-main">
+                  <p class="haul-name"><%= haul.name %></p>
+                  <p class="haul-meta">
+                    <span>#<%= haul.id %></span>
+                    <% if (haul.genre) { %>
+                      <span>&middot;</span>
+                      <span><%= haul.genre %></span>
+                    <% } %>
+                    <span>&middot;</span>
+                    <span>Expired</span>
+                  </p>
+                  <p class="haul-progress-label haul-progress-label-muted">
+                    <% if (haul.itemsLeft != null) { %>
+                      <strong><%= haul.itemsLeft %></strong> item(s) not sold before the deadline
+                    <% } else { %>
+                      Items remaining when time expired
+                    <% } %>
+                  </p>
+                </div>
+                <div class="haul-row-stats haul-row-stats-vertical">
+                  <button
+                    type="button"
+                    class="btn btn-secondary btn-compact"
+                    data-modal-target="#expiredModal-<%= haul.id %>"
+                  >
+                    Review not sold
+                  </button>
+                </div>
+              </article>
+
+              <div
+                id="expiredModal-<%= haul.id %>"
+                class="modal-backdrop"
+                aria-hidden="true"
+                data-modal
+              >
+                <div
+                  class="modal"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="expiredModalTitle-<%= haul.id %>"
+                >
+                  <div class="modal-header">
+                    <div>
+                      <p class="label">Not sold items</p>
+                      <h2
+                        id="expiredModalTitle-<%= haul.id %>"
+                        class="modal-title"
+                      >
+                        <%= haul.name %>
+                      </h2>
+                    </div>
+                    <button
+                      class="icon-button"
+                      type="button"
+                      aria-label="Close"
+                      data-modal-close
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div class="modal-form">
+                    <% if (haul.itemsLeft != null && haul.itemsLeft > 0) { %>
+                      <p class="empty-state-text">
+                        You had <strong><%= haul.itemsLeft %></strong> item(s) left when this haul expired.
+                      </p>
+                      <ul class="not-sold-list">
+                        <% for (let i = 1; i <= haul.itemsLeft; i++) { %>
+                          <li class="not-sold-item">
+                            <span class="not-sold-label">Not sold item <%= i %></span>
+                            <span class="not-sold-meta">
+                              From haul "<%= haul.name %>"
+                            </span>
+                          </li>
+                        <% } %>
+                      </ul>
+                    <% } else { %>
+                      <p class="empty-state-text">
+                        This haul expired with remaining items, but an exact count is not available.
+                      </p>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        </div>
+      <% } %>
+    </div>
+
+    <aside class="dashboard-column dashboard-column-secondary">
+      <div class="dashboard-section">
+        <div class="section-header">
+          <h3 class="section-title">Shared Notes</h3>
+          <a href="/shared-notes" class="btn btn-secondary btn-compact">
+            Open
+          </a>
+        </div>
+        <% if (!latestSharedNote) { %>
+          <p class="empty-state-text">
+            A shared space for both profiles. Plan hauls, ideas, and reminders together.
+          </p>
+        <% } else { %>
+          <a href="/shared-notes" class="shared-notes-preview-link">
+            <p class="shared-notes-preview-title"><%= latestSharedNote.title || 'Untitled' %></p>
+            <p class="shared-notes-preview-meta">
+              <%= latestSharedNote.last_edited_by_name || latestSharedNote.created_by_name %> · <%= latestSharedNote.updated_at ? new Date(latestSharedNote.updated_at.replace(' ', 'T') + 'Z').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '' %>
+            </p>
+          </a>
+        <% } %>
+      </div>
+
+      <div class="dashboard-section">
+        <div class="section-header">
+          <h3 class="section-title">Tools</h3>
+          <a href="/tools" class="btn btn-secondary btn-compact">
+            Open
+          </a>
+        </div>
+        <p class="empty-state-text">
+          Manage profile-specific receipts and PDFs in a simple, organised view.
+        </p>
+      </div>
+
+      <div class="dashboard-section">
+        <div class="section-header">
+          <h3 class="section-title">Track Hauls</h3>
+          <a href="/track-hauls" class="btn btn-secondary btn-compact">
+            Open
+          </a>
+        </div>
+        <p class="empty-state-text">
+          View active hauls and open Australia Post tracking in one place.
+        </p>
+      </div>
+
+      <div class="dashboard-section">
+        <div class="section-header">
+          <h3 class="section-title">Issues</h3>
+          <a href="/issues" class="btn btn-secondary btn-compact">
+            View all
+          </a>
+        </div>
+
+        <% if (!openIssues || openIssues.length === 0) { %>
+          <p class="empty-state-text">
+            No active issues right now. When you log disputes or buyer problems, they’ll appear here.
+          </p>
+        <% } else { %>
+          <ul class="issues-list">
+            <% openIssues.slice(0, 3).forEach(function (issue) { %>
+              <li class="issues-item">
+                <div class="issues-main">
+                  <p class="issues-title">
+                    <%= issue.platform || 'Issue' %>
+                    <% if (issue.order_ref) { %>
+                      · <span class="issue-order-ref"><%= issue.order_ref %></span>
+                    <% } %>
+                  </p>
+                  <p class="issues-meta">
+                    <%= issue.description %>
+                  </p>
+                  <% if (issue.due_at) { %>
+                    <p class="issues-meta">
+                      <span
+                        class="countdown countdown-issue"
+                        data-countdown-end="<%= issue.due_at %>"
+                      >
+                        Calculating…
+                      </span>
+                    </p>
+                  <% } %>
+                </div>
+                <form
+                  action="/issues/<%= issue.id %>/resolve?from=dashboard"
+                  method="POST"
+                  class="issues-resolve-form"
+                >
+                  <button
+                    type="submit"
+                    class="btn btn-primary btn-compact"
+                  >
+                    Fixed
+                  </button>
+                </form>
+              </li>
+            <% }); %>
+          </ul>
+        <% } %>
+      </div>
+
+      <div class="dashboard-section">
+        <h3 class="section-title">To do</h3>
+        <form class="todo-form" action="/todos" method="POST" novalidate>
+          <div class="todo-form-row">
+            <input
+              type="text"
+              name="text"
+              class="input todo-input"
+              placeholder="Add a task for your resell work"
+              autocomplete="off"
+              required
+            />
+            <button type="submit" class="btn btn-primary btn-compact">
+              Add
+            </button>
+          </div>
+        </form>
+
+        <% if (!todos || todos.length === 0) { %>
+          <p class="empty-state-text">
+            No tasks yet. Add a quick checklist for your hauls.
+          </p>
+        <% } else { %>
+          <ul class="todo-list">
+            <% todos.forEach(function (todo) { %>
+              <li class="todo-item">
+                <form
+                  action="/todos/<%= todo.id %>/toggle"
+                  method="POST"
+                  class="todo-toggle-form"
+                >
+                  <button
+                    type="submit"
+                    class="todo-check <%= todo.completed ? 'todo-check-completed' : '' %>"
+                    aria-label="Toggle completed"
+                  ></button>
+                </form>
+                <p
+                  class="todo-text <%= todo.completed ? 'todo-text-completed' : '' %>"
+                >
+                  <%= todo.text %>
+                </p>
+                <% if (todo.completed) { %>
+                  <form
+                    action="/todos/<%= todo.id %>/delete"
+                    method="POST"
+                    class="todo-delete-form"
+                  >
+                    <button
+                      type="submit"
+                      class="icon-button icon-button-small icon-button-danger"
+                      title="Delete completed task"
+                    >
+                      🗑
+                    </button>
+                  </form>
+                <% } %>
+              </li>
+            <% }); %>
+          </ul>
+        <% } %>
+      </div>
+
+      <div class="dashboard-section">
+        <div class="section-header">
+          <h3 class="section-title">Upcoming planning</h3>
+          <a href="/planning" class="btn btn-secondary btn-compact">
+            Open
+          </a>
+        </div>
+
+        <% if (!plans || plans.length === 0) { %>
+          <p class="empty-state-text">
+            Plan your next haul here so you always know what’s coming up.
+          </p>
+        <% } else { %>
+          <ul class="planning-preview-list">
+            <% plans.slice(0, 3).forEach(function (plan) { %>
+              <li class="planning-preview-item">
+                <p class="planning-preview-title"><%= plan.title %></p>
+                <p class="planning-preview-meta">
+                  <% if (plan.target_date) { %>
+                    <span>Target: <%= plan.target_date %></span>
+                  <% } else { %>
+                    <span>No date</span>
+                  <% } %>
+                  <% if (plan.what_to_buy) { %>
+                    <span>&middot;</span>
+                    <span><%= plan.what_to_buy %></span>
+                  <% } %>
+                </p>
+              </li>
+            <% }); %>
+          </ul>
+        <% } %>
+      </div>
+
+      <div class="dashboard-section">
+        <h3 class="section-title">Recent sales</h3>
+        <% if (!recentSales || recentSales.length === 0) { %>
+          <p class="empty-state-text">
+            You have not recorded any sales yet. Mark items as sold to see activity here.
+          </p>
+        <% } else { %>
+          <ul class="activity-list">
+            <% recentSales.forEach(function (sale) { %>
+              <li class="activity-item">
+                <div class="activity-main">
+                  <p class="activity-title">
+                    <%= sale.item_name || 'Item' %>
+                  </p>
+                  <p class="activity-meta">
+                    <span><%= sale.haul_name %></span>
+                    <% if (sale.platform) { %>
+                      <span>&middot;</span>
+                      <span><%= sale.platform %></span>
+                    <% } %>
+                  </p>
+                </div>
+                <div class="activity-amounts">
+                  <span class="activity-price">
+                    $<%= (sale.sold_price || 0).toFixed(2) %>
+                  </span>
+                  <% const cost = sale.item_cost || 0; %>
+                  <% const profit = (sale.sold_price || 0) - cost; %>
+                  <span
+                    class="activity-profit <%= profit >= 0 ? 'activity-profit-positive' : 'activity-profit-negative' %>"
+                  >
+                    <%= profit >= 0 ? '+' : '' %>$<%= profit.toFixed(2) %>
+                  </span>
+                </div>
+              </li>
+            <% }); %>
+          </ul>
+        <% } %>
+      </div>
+
+      <div class="dashboard-section">
+        <div class="section-header">
+          <h3 class="section-title">All sold items</h3>
+          <a href="/sold-items" class="btn btn-secondary btn-compact">
+            View
+          </a>
+        </div>
+      </div>
+    </aside>
+  </section>
+</section>
+

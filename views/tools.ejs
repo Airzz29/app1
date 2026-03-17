@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#050816" />
+    <title>Resell Tracker · Tools</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/jpeg" href="/icon.jpg" />
+    <link rel="apple-touch-icon" href="/icon.jpg" />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body class="app-body">
+    <div class="app-shell app-shell-visible">
+      <%- include('partials/header') %>
+
+      <main class="app-main">
+        <section class="dashboard">
+          <section class="dashboard-section">
+            <div class="card card-highlight">
+              <div class="section-header section-header-tight">
+                <div>
+                  <p class="label">Tools</p>
+                  <h2 class="card-title">Receipts</h2>
+                </div>
+                <a href="/" class="btn btn-secondary btn-compact">
+                  Back to dashboard
+                </a>
+              </div>
+
+              <div class="tools-header">
+                <form class="tools-filters" method="GET" action="/tools">
+                  <div class="tools-filters-main">
+                    <input
+                      type="text"
+                      name="q"
+                      value="<%= query || '' %>"
+                      placeholder="Search by brand or title"
+                      class="input"
+                      autocomplete="off"
+                    />
+                  </div>
+                  <div class="tools-filters-side">
+                    <select
+                      name="sort"
+                      class="input"
+                      onchange="this.form.submit()"
+                    >
+                      <option value="date_desc" <%= sort === 'date_desc' ? 'selected' : '' %>>
+                        Newest first
+                      </option>
+                      <option value="date_asc" <%= sort === 'date_asc' ? 'selected' : '' %>>
+                        Oldest first
+                      </option>
+                      <option value="name" <%= sort === 'name' ? 'selected' : '' %>>
+                        Name (A–Z)
+                      </option>
+                    </select>
+                    <button
+                      type="button"
+                      class="btn btn-primary btn-compact"
+                      data-modal-target="#uploadReceiptModal"
+                    >
+                      Upload receipt
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              <% if (!receipts || receipts.length === 0) { %>
+                <p class="empty-state-text">
+                  You have not uploaded any receipts yet for this profile.
+                  Use the Upload receipt button to add your first PDF.
+                </p>
+              <% } else { %>
+                <ul class="tools-list">
+                  <% receipts.forEach(function (receipt) { %>
+                    <li class="tools-item">
+                      <div class="tools-main">
+                        <p class="tools-title"><%= receipt.title %></p>
+                        <p class="tools-meta">
+                          <% if (receipt.brand) { %>
+                            <span><%= receipt.brand %></span>
+                            <span>&middot;</span>
+                          <% } %>
+                          <% if (receipt.size_bytes != null) { %>
+                            <% const kb = Math.max(1, Math.round(receipt.size_bytes / 1024)); %>
+                            <span><%= kb %> KB</span>
+                            <span>&middot;</span>
+                          <% } %>
+                          <span><%= receipt.uploaded_at %></span>
+                        </p>
+                      </div>
+                      <div class="tools-actions">
+                        <a
+                          href="/tools/<%= receipt.id %>/download"
+                          class="btn btn-secondary btn-compact"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          View PDF
+                        </a>
+                        <button
+                          type="button"
+                          class="icon-button icon-button-small icon-button-danger"
+                          title="Delete receipt"
+                          data-modal-target="#deleteReceiptModal-<%= receipt.id %>"
+                        >
+                          🗑
+                        </button>
+                      </div>
+                    </li>
+
+                    <div
+                      id="deleteReceiptModal-<%= receipt.id %>"
+                      class="modal-backdrop"
+                      aria-hidden="true"
+                      data-modal
+                    >
+                      <div
+                        class="modal"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="deleteReceiptModalTitle-<%= receipt.id %>"
+                      >
+                        <div class="modal-header">
+                          <div>
+                            <p class="label">Delete receipt</p>
+                            <h2
+                              id="deleteReceiptModalTitle-<%= receipt.id %>"
+                              class="modal-title"
+                            >
+                              <%= receipt.title %>
+                            </h2>
+                          </div>
+                          <button
+                            class="icon-button"
+                            type="button"
+                            aria-label="Close"
+                            data-modal-close
+                          >
+                            ✕
+                          </button>
+                        </div>
+
+                        <form
+                          class="modal-form"
+                          action="/tools/<%= receipt.id %>/delete"
+                          method="POST"
+                        >
+                          <p class="empty-state-text">
+                            This will permanently remove the stored PDF and its
+                            metadata from this profile.
+                          </p>
+                          <div class="modal-footer">
+                            <button
+                              type="button"
+                              class="btn btn-ghost"
+                              data-modal-close
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="submit"
+                              class="btn btn-primary btn-danger"
+                            >
+                              Delete receipt
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  <% }); %>
+                </ul>
+              <% } %>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <div
+      id="uploadReceiptModal"
+      class="modal-backdrop"
+      aria-hidden="true"
+      data-modal
+    >
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="uploadReceiptModalTitle"
+      >
+        <div class="modal-header">
+          <div>
+            <p class="label">Tools</p>
+            <h2 id="uploadReceiptModalTitle" class="modal-title">
+              Upload receipt
+            </h2>
+          </div>
+          <button
+            class="icon-button"
+            type="button"
+            aria-label="Close"
+            data-modal-close
+          >
+            ✕
+          </button>
+        </div>
+
+        <form
+          class="modal-form"
+          action="/tools/upload"
+          method="POST"
+          enctype="multipart/form-data"
+          novalidate
+        >
+          <div class="form-group">
+            <label for="receiptBrand" class="form-label">Brand</label>
+            <input
+              id="receiptBrand"
+              name="brand"
+              type="text"
+              class="input"
+              autocomplete="off"
+              placeholder="e.g. Nike, Apple, Zara"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="receiptTitle" class="form-label">
+              Name / title<span class="required">*</span>
+            </label>
+            <input
+              id="receiptTitle"
+              name="title"
+              type="text"
+              class="input"
+              required
+              autocomplete="off"
+              placeholder="e.g. Nike SNKRS 2025-03 order"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="receiptFile" class="form-label">
+              Receipt PDF<span class="required">*</span>
+            </label>
+            <input
+              id="receiptFile"
+              name="receiptFile"
+              type="file"
+              accept="application/pdf,.pdf"
+              class="input"
+              required
+            />
+            <p class="tools-hint">
+              PDF files only, up to 10&nbsp;MB.
+            </p>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-ghost"
+              data-modal-close
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">
+              Save receipt
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="/js/main.js"></script>
+  </body>
+</html>
+

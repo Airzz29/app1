@@ -1,0 +1,113 @@
+<%
+  const hasTracking = haul.tracking_number && String(haul.tracking_number).trim();
+  const trackUrl = hasTracking ? 'https://auspost.com.au/mypost/track/details/' + encodeURIComponent(String(haul.tracking_number).trim()) : '';
+  const refIso = (haul.tracking_added_at && String(haul.tracking_added_at).trim()) ? haul.tracking_added_at : haul.created_at;
+  const refStr = refIso ? String(refIso).replace(' ', 'T').trim() + (String(refIso).indexOf('Z') >= 0 ? '' : 'Z') : '';
+  const refDate = refStr ? new Date(refStr) : null;
+  const now = Date.now();
+  const MS_PER_DAY = 24 * 60 * 60 * 1000;
+  let timeAgoLabel = '';
+  let countdownLabel = '';
+  let countdownOverdue = false;
+  if (refDate && !isNaN(refDate.getTime())) {
+    const daysAgo = Math.floor((now - refDate.getTime()) / MS_PER_DAY);
+    if (haul.tracking_added_at && hasTracking) {
+      timeAgoLabel = daysAgo === 0 ? 'Tracking added today' : (daysAgo === 1 ? 'Tracking added 1 day ago' : 'Tracking added ' + daysAgo + ' days ago');
+    } else {
+      timeAgoLabel = daysAgo === 0 ? 'Created today' : (daysAgo === 1 ? 'Created 1 day ago' : 'Created ' + daysAgo + ' days ago');
+    }
+    const countdownEnd = refDate.getTime() + 15 * MS_PER_DAY;
+    if (now < countdownEnd) {
+      const daysRemaining = Math.ceil((countdownEnd - now) / MS_PER_DAY);
+      countdownLabel = daysRemaining === 1 ? '1 day remaining' : (daysRemaining + ' days remaining');
+    } else {
+      countdownOverdue = true;
+      const daysOverdue = Math.floor((now - countdownEnd) / MS_PER_DAY);
+      countdownLabel = daysOverdue === 0 ? '15 days passed' : ('Overdue by ' + daysOverdue + ' day' + (daysOverdue === 1 ? '' : 's'));
+    }
+  }
+%>
+<article
+  class="track-haul-card <%= hasTracking ? 'track-haul-card-clickable' : '' %>"
+  <% if (hasTracking) { %>
+    data-tracking-number="<%= haul.tracking_number %>"
+  <% } %>
+>
+  <div class="track-haul-card-inner">
+    <% if (haul.cover_image) { %>
+      <div class="track-haul-thumb">
+        <img
+          src="<%= haul.cover_image %>"
+          alt=""
+          loading="lazy"
+        />
+      </div>
+    <% } %>
+    <div class="track-haul-body">
+      <h3 class="track-haul-name"><%= haul.name %></h3>
+      <% if (haul.genre) { %>
+        <p class="track-haul-meta"><%= haul.genre %></p>
+      <% } %>
+      <% if (timeAgoLabel) { %>
+        <p class="track-haul-time-ago"><%= timeAgoLabel %></p>
+      <% } %>
+      <% if (countdownLabel) { %>
+        <p class="track-haul-countdown <%= countdownOverdue ? 'track-haul-countdown-overdue' : '' %>">
+          <%= countdownLabel %>
+        </p>
+      <% } %>
+      <% if (hasTracking) { %>
+        <div class="track-haul-tracking-row">
+          <span class="track-haul-label">Tracking</span>
+          <span class="track-haul-number" title="<%= haul.tracking_number %>"><%= haul.tracking_number %></span>
+          <div class="track-haul-actions">
+            <button
+              type="button"
+              class="btn btn-ghost btn-compact track-haul-copy"
+              data-copy-tracking="<%= haul.tracking_number %>"
+              title="Copy tracking number"
+            >
+              Copy
+            </button>
+            <a
+              href="<%= trackUrl %>"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn btn-secondary btn-compact track-haul-track-btn"
+              title="Open Australia Post tracking"
+              data-track-url="<%= trackUrl %>"
+            >
+              Track
+            </a>
+          </div>
+        </div>
+      <% } else { %>
+        <div class="track-haul-no-tracking">
+          <p class="track-haul-not-added">Tracking number not added yet</p>
+          <button
+            type="button"
+            class="btn btn-ghost btn-compact track-haul-edit-tracking"
+            data-modal-target="#editModal-<%= haul.id %>"
+          >
+            Edit tracking
+          </button>
+        </div>
+      <% } %>
+      <div class="track-haul-status-actions">
+        <% if (isFinished) { %>
+          <form action="/hauls/<%= haul.id %>/tracking-active" method="POST" class="track-haul-form-inline">
+            <button type="submit" class="btn btn-ghost btn-compact">
+              Move back to Active
+            </button>
+          </form>
+        <% } else { %>
+          <form action="/hauls/<%= haul.id %>/tracking-finish" method="POST" class="track-haul-form-inline">
+            <button type="submit" class="btn btn-ghost btn-compact track-haul-mark-finished">
+              Mark as Finished
+            </button>
+          </form>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</article>

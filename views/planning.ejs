@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#050816" />
+    <title>Resell Tracker · Planning</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/jpeg" href="/icon.jpg" />
+    <link rel="apple-touch-icon" href="/icon.jpg" />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body class="app-body">
+    <div class="app-shell app-shell-visible">
+      <%- include('partials/header') %>
+
+      <main class="app-main">
+        <section class="dashboard">
+          <section class="dashboard-section">
+            <div class="card card-highlight">
+              <div class="section-header section-header-tight">
+                <div>
+                  <p class="label">Planning</p>
+                  <h2 class="card-title">Upcoming hauls</h2>
+                </div>
+                <a href="/" class="btn btn-secondary btn-compact">
+                  Back to dashboard
+                </a>
+              </div>
+
+              <form
+                class="modal-form planning-form"
+                action="/planning"
+                method="POST"
+                novalidate
+              >
+                <div class="form-group">
+                  <label for="planTitle" class="form-label">
+                    Plan title<span class="required">*</span>
+                  </label>
+                  <input
+                    id="planTitle"
+                    name="title"
+                    type="text"
+                    class="input"
+                    required
+                    autocomplete="off"
+                    placeholder="e.g. Q2 sneaker drop sourcing"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="planWhatToBuy" class="form-label">
+                    What to buy
+                  </label>
+                  <textarea
+                    id="planWhatToBuy"
+                    name="whatToBuy"
+                    rows="2"
+                    class="input planning-textarea"
+                    placeholder="e.g. 10x mid-tier sneakers, 5x vintage tees"
+                  ></textarea>
+                </div>
+
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="planTargetDate" class="form-label">
+                      Target date
+                    </label>
+                    <input
+                      id="planTargetDate"
+                      name="targetDate"
+                      type="date"
+                      class="input"
+                    />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="planDetails" class="form-label">
+                    Notes
+                  </label>
+                  <textarea
+                    id="planDetails"
+                    name="details"
+                    rows="4"
+                    class="input planning-textarea"
+                    placeholder="Any extra details, sourcing spots, budget, etc."
+                  ></textarea>
+                </div>
+
+                <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary">
+                    Save plan
+                  </button>
+                </div>
+              </form>
+            </div>
+          </section>
+
+          <section class="dashboard-section">
+            <div class="section-header">
+              <h3 class="section-title">All plans</h3>
+            </div>
+
+            <% if (!plans || plans.length === 0) { %>
+              <p class="empty-state-text">
+                You don’t have any planning notes yet. Create one above to get
+                started.
+              </p>
+            <% } else { %>
+              <div class="haul-list haul-list-subtle planning-list">
+                <% plans.forEach(function (plan) { %>
+                  <article class="haul-row haul-row-previous">
+                    <div class="haul-row-main">
+                      <p class="haul-name"><%= plan.title %></p>
+                      <p class="haul-meta">
+                        <% if (plan.target_date) { %>
+                          <span>Target: <%= plan.target_date %></span>
+                        <% } else { %>
+                          <span>No target date</span>
+                        <% } %>
+                      </p>
+                      <% if (plan.what_to_buy) { %>
+                        <p class="haul-progress-label haul-progress-label-muted">
+                          <%= plan.what_to_buy %>
+                        </p>
+                      <% } %>
+                      <% if (plan.details) { %>
+                        <p class="planning-details">
+                          <%= plan.details %>
+                        </p>
+                      <% } %>
+                    </div>
+                    <div class="haul-actions">
+                      <button
+                        type="button"
+                        class="icon-button icon-button-small icon-button-danger"
+                        title="Delete plan"
+                        data-modal-target="#deletePlanModal-<%= plan.id %>"
+                      >
+                        🗑
+                      </button>
+                    </div>
+                  </article>
+
+                  <div
+                    id="deletePlanModal-<%= plan.id %>"
+                    class="modal-backdrop"
+                    aria-hidden="true"
+                    data-modal
+                  >
+                    <div
+                      class="modal"
+                      role="dialog"
+                      aria-modal="true"
+                      aria-labelledby="deletePlanModalTitle-<%= plan.id %>"
+                    >
+                      <div class="modal-header">
+                        <div>
+                          <p class="label">Delete plan</p>
+                          <h2
+                            id="deletePlanModalTitle-<%= plan.id %>"
+                            class="modal-title"
+                          >
+                            <%= plan.title %>
+                          </h2>
+                        </div>
+                        <button
+                          class="icon-button"
+                          type="button"
+                          aria-label="Close"
+                          data-modal-close
+                        >
+                          ✕
+                        </button>
+                      </div>
+
+                      <form
+                        class="modal-form"
+                        action="/planning/<%= plan.id %>/delete"
+                        method="POST"
+                      >
+                        <p class="empty-state-text">
+                          This will permanently remove this plan from your
+                          planning list. This cannot be undone.
+                        </p>
+                        <div class="modal-footer">
+                          <button
+                            type="button"
+                            class="btn btn-ghost"
+                            data-modal-close
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="submit"
+                            class="btn btn-primary btn-danger"
+                          >
+                            Delete plan
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                <% }); %>
+              </div>
+            <% } %>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script src="/js/main.js"></script>
+  </body>
+</html>
+
