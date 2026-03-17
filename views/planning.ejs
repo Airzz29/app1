@@ -116,24 +116,9 @@
                 <% plans.forEach(function (plan) { %>
                   <article class="haul-row haul-row-previous">
                     <div class="haul-row-main">
-                      <p class="haul-name"><%= plan.title %></p>
-                      <p class="haul-meta">
-                        <% if (plan.target_date) { %>
-                          <span>Target: <%= plan.target_date %></span>
-                        <% } else { %>
-                          <span>No target date</span>
-                        <% } %>
-                      </p>
-                      <% if (plan.what_to_buy) { %>
-                        <p class="haul-progress-label haul-progress-label-muted">
-                          <%= plan.what_to_buy %>
-                        </p>
-                      <% } %>
-                      <% if (plan.details) { %>
-                        <p class="planning-details">
-                          <%= plan.details %>
-                        </p>
-                      <% } %>
+                      <a class="planning-title-link" href="/planning/<%= plan.id %>">
+                        <p class="haul-name"><%= plan.title %></p>
+                      </a>
                     </div>
                     <div class="haul-actions">
                       <button
