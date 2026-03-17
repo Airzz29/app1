@@ -2269,3 +2269,65 @@ input[type='file'].input::file-selector-button:hover {
   margin-top: 0.75rem;
 }
 
+.planning-detail-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.planning-view {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.planning-view-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  color: #9ca3af;
+  font-size: 0.85rem;
+}
+
+.planning-view-section .section-title {
+  margin-bottom: 0.5rem;
+}
+
+.planning-preview-view {
+  margin-top: 0.4rem;
+}
+
+.planning-raw {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.planning-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.35rem 0 0.45rem;
+}
+
+.planning-tool {
+  border: 1px solid #1e293b;
+  background: rgba(15, 23, 42, 0.9);
+  color: #d1d5db;
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+  min-height: 36px;
+}
+
+.planning-tool:hover {
+  filter: brightness(1.05);
+}
+
+.planning-tool:active {
+  transform: translateY(1px);
+}
+
