@@ -1,72 +1,128 @@
 <section class="dashboard">
   <% const hasActive = activeHauls && activeHauls.length > 0; %>
+  <% const hasUpcoming = upcomingHauls && upcomingHauls.length > 0; %>
 
   <section class="dashboard-section dashboard-section-top">
-    <div class="card card-highlight dashboard-metrics-card">
-      <div class="section-header section-header-tight">
-        <div>
-          <p class="label">Resell Tracker</p>
-          <h2 class="card-title">Business overview</h2>
+    <div class="card card-highlight dashboard-overview-panel dashboard-metrics-card">
+      <header class="dashboard-hero">
+        <div class="dashboard-hero-main">
+          <p class="label dashboard-hero-label">Dashboard</p>
+          <h2 class="dashboard-hero-title">Business overview</h2>
+          <p class="dashboard-hero-sub">Performance at a glance</p>
         </div>
-        <button
-          class="btn btn-secondary btn-compact"
-          type="button"
-          data-modal-target="#haulModal"
-        >
-          Add haul
-        </button>
-      </div>
+        <div class="dashboard-hero-actions">
+          <button
+            class="btn btn-primary btn-compact dashboard-hero-cta"
+            type="button"
+            data-modal-target="#haulModal"
+          >
+            Add haul
+          </button>
+        </div>
+      </header>
 
-      <div class="metrics-grid">
-        <div class="metric">
-          <p class="metric-label">Items sold · 30d</p>
-          <p class="metric-value"><%= stats.itemsSoldLast30Days %></p>
-        </div>
-        <div class="metric">
-          <p class="metric-label">Weekly revenue</p>
-          <p class="metric-value">
-            $<%= stats.weeklyRevenue.toFixed(2) %>
-          </p>
-        </div>
-        <div class="metric">
-          <p class="metric-label">Weekly profit</p>
-          <p class="metric-value metric-value-good">
-            $<%= stats.weeklyProfit.toFixed(2) %>
-          </p>
-        </div>
-        <div class="metric">
-          <p class="metric-label">Active hauls</p>
-          <p class="metric-value"><%= stats.totalActiveHauls %></p>
-        </div>
-        <div class="metric">
-          <p class="metric-label">Items left to sell</p>
-          <p class="metric-value"><%= stats.itemsLeftTotal %></p>
-        </div>
-        <div class="metric metric-subtle">
-          <p class="metric-label">Lifetime profit</p>
-          <p class="metric-value">
-            $<%= stats.totalProfit.toFixed(2) %>
-          </p>
+      <% if (walletSummary) { %>
+        <a href="/wallet" class="dashboard-wallet-banner">
+          <div class="dashboard-wallet-banner-inner">
+            <span class="dashboard-wallet-banner-label">Wallet balance</span>
+            <span class="dashboard-wallet-banner-value" data-wallet-balance>
+              $<%= walletSummary.balance.toFixed(2) %>
+            </span>
+          </div>
+          <span class="dashboard-wallet-banner-chevron" aria-hidden="true">›</span>
+        </a>
+      <% } %>
+
+      <div class="dashboard-kpi-section">
+        <p class="dashboard-kpi-heading">Key metrics</p>
+        <div class="metrics-grid dashboard-kpi-grid">
+          <div class="metric metric-kpi metric-kpi-profit">
+            <p class="metric-label">Weekly profit</p>
+            <p class="metric-value metric-value-good">
+              $<%= stats.weeklyProfit.toFixed(2) %>
+            </p>
+          </div>
+          <div class="metric metric-kpi">
+            <p class="metric-label">Weekly revenue</p>
+            <p class="metric-value">
+              $<%= stats.weeklyRevenue.toFixed(2) %>
+            </p>
+          </div>
+          <div class="metric metric-kpi">
+            <p class="metric-label">Items sold · 30d</p>
+            <p class="metric-value"><%= stats.itemsSoldLast30Days %></p>
+          </div>
+          <div class="metric metric-kpi">
+            <p class="metric-label">Active hauls</p>
+            <p class="metric-value"><%= stats.totalActiveHauls %></p>
+          </div>
+          <div class="metric metric-kpi">
+            <p class="metric-label">Items left to sell</p>
+            <p class="metric-value"><%= stats.itemsLeftTotal %></p>
+          </div>
+          <div class="metric metric-kpi metric-subtle">
+            <p class="metric-label">Lifetime profit</p>
+            <p class="metric-value">
+              $<%= stats.totalProfit.toFixed(2) %>
+            </p>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
   <section class="dashboard-section dashboard-main-layout">
-    <div class="dashboard-column">
-      <% if (walletSummary) { %>
-        <div class="card wallet-card">
-          <a href="/wallet" class="wallet-card-link">
-            <div class="wallet-card-header">
-              <p class="label">Wallet</p>
-              <span class="wallet-card-chevron">›</span>
-            </div>
-            <p class="wallet-card-balance" data-wallet-balance>
-              $<%= walletSummary.balance.toFixed(2) %>
-            </p>
-          </a>
+    <div class="dashboard-column dashboard-column-primary">
+      <div class="dashboard-primary-surface">
+      <div class="dashboard-zone dashboard-zone-upcoming">
+        <div class="dashboard-zone-header">
+          <h3 class="dashboard-zone-title">Upcoming hauls</h3>
+          <button
+            type="button"
+            class="btn btn-secondary btn-compact"
+            data-modal-target="#upcomingHaulModal"
+          >
+            Add upcoming
+          </button>
         </div>
-      <% } %>
+        <p class="dashboard-zone-sub">
+          Hauls you&apos;re buying soon — no sell window. Track numbers and notes only.
+        </p>
+        <% if (!hasUpcoming) { %>
+          <div class="card card-zone-empty">
+            <p class="empty-state-text">
+              Nothing upcoming yet. Add one when you&apos;re about to buy a haul.
+            </p>
+          </div>
+        <% } else { %>
+          <ul class="upcoming-haul-list">
+            <% upcomingHauls.forEach(function (u) { %>
+              <li class="upcoming-haul-item">
+                <div class="upcoming-haul-main">
+                  <% if (u.tracking_number && String(u.tracking_number).trim()) { %>
+                    <p class="upcoming-haul-tracking"><%= u.tracking_number %></p>
+                  <% } else { %>
+                    <p class="upcoming-haul-tracking upcoming-haul-tracking-muted">No tracking yet</p>
+                  <% } %>
+                  <% if (u.notes && String(u.notes).trim()) { %>
+                    <p class="upcoming-haul-notes"><%= u.notes %></p>
+                  <% } %>
+                </div>
+                <form action="/upcoming-hauls/<%= u.id %>/delete" method="POST" class="upcoming-haul-delete-form">
+                  <button type="submit" class="icon-button icon-button-small icon-button-danger" title="Remove" aria-label="Remove upcoming haul">
+                    🗑
+                  </button>
+                </form>
+              </li>
+            <% }); %>
+          </ul>
+        <% } %>
+      </div>
+
+      <div class="dashboard-zone dashboard-zone-active">
+        <div class="dashboard-zone-header">
+          <h3 class="dashboard-zone-title">Active hauls</h3>
+        </div>
 
       <% if (!hasActive) { %>
         <div class="empty-state-card">
@@ -83,10 +139,6 @@
           </button>
         </div>
       <% } else { %>
-        <div class="section-header">
-          <h3 class="section-title">Active hauls</h3>
-        </div>
-
         <div class="haul-list">
           <% activeHauls.forEach(function (haul) { %>
             <article class="haul-row haul-row-card">
@@ -611,9 +663,11 @@
           </div>
         </div>
       <% } %>
+      </div>
+      </div>
     </div>
 
-    <aside class="dashboard-column dashboard-column-secondary">
+    <aside class="dashboard-column dashboard-column-secondary dashboard-sidebar">
       <div class="dashboard-section">
         <div class="section-header">
           <h3 class="section-title">Shared Notes</h3>
