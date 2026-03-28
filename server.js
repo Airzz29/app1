@@ -242,6 +242,19 @@ db.serialize(() => {
   db.run(
     'CREATE INDEX IF NOT EXISTS idx_shared_notes_updated ON shared_notes(updated_at)',
   );
+
+  db.run(
+    `CREATE TABLE IF NOT EXISTS upcoming_hauls (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      profile_id INTEGER NOT NULL,
+      tracking_number TEXT,
+      notes TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    )`,
+  );
+  db.run(
+    'CREATE INDEX IF NOT EXISTS idx_upcoming_hauls_profile ON upcoming_hauls(profile_id)',
+  );
 });
 
 // Helpers
@@ -316,6 +329,50 @@ function deleteTodo(id) {
   return new Promise((resolve, reject) => {
     const stmt = db.prepare('DELETE FROM todos WHERE id = ?');
     stmt.run(id, (err) => {
+      if (err) return reject(err);
+      resolve();
+    });
+    stmt.finalize();
+  });
+}
+
+function getUpcomingHauls(profileId) {
+  return new Promise((resolve, reject) => {
+    db.all(
+      'SELECT * FROM upcoming_hauls WHERE profile_id = ? ORDER BY created_at DESC',
+      [profileId],
+      (err, rows) => {
+        if (err) return reject(err);
+        resolve(rows || []);
+      },
+    );
+  });
+}
+
+function createUpcomingHaul({ trackingNumber, notes, profileId }) {
+  return new Promise((resolve, reject) => {
+    const stmt = db.prepare(
+      'INSERT INTO upcoming_hauls (tracking_number, notes, profile_id) VALUES (?, ?, ?)',
+    );
+    stmt.run(
+      trackingNumber ? String(trackingNumber).trim() : null,
+      notes ? String(notes).trim() : null,
+      profileId,
+      function onRun(err) {
+        if (err) return reject(err);
+        resolve(this.lastID);
+      },
+    );
+    stmt.finalize();
+  });
+}
+
+function deleteUpcomingHaulForProfile(id, profileId) {
+  return new Promise((resolve, reject) => {
+    const stmt = db.prepare(
+      'DELETE FROM upcoming_hauls WHERE id = ? AND profile_id = ?',
+    );
+    stmt.run(id, profileId, (err) => {
       if (err) return reject(err);
       resolve();
     });
@@ -1077,7 +1134,7 @@ app.get('/', async (req, res) => {
   }
 
   try {
-    const [hauls, sales, recentSales, todos, plans, issues, walletTxns, latestSharedNote] =
+    const [hauls, sales, recentSales, todos, plans, issues, walletTxns, latestSharedNote, upcomingHauls] =
       await Promise.all([
         getAllHauls(profileId),
         getAllSales(profileId),
@@ -1087,6 +1144,7 @@ app.get('/', async (req, res) => {
         getAllIssues(profileId),
         getWalletTransactions(profileId),
         getMostRecentSharedNote(),
+        getUpcomingHauls(profileId),
       ]);
     const { activeHauls, expiredHauls, previousHauls, stats } =
       buildDashboardData(hauls, sales);
@@ -1105,6 +1163,7 @@ app.get('/', async (req, res) => {
       openIssues,
       walletSummary,
       latestSharedNote,
+      upcomingHauls,
     });
   } catch (err) {
     res.status(500).send('Database error');
@@ -1158,6 +1217,41 @@ app.post('/hauls/:id/tracking-active', async (req, res) => {
     // ignore
   }
   res.redirect('/track-hauls');
+});
+
+app.post('/upcoming-hauls', async (req, res) => {
+  const profileId = getProfileIdFromRequest(req);
+  if (!profileId) return res.redirect('/profiles');
+  const { trackingNumber, notes } = req.body || {};
+  const tn = trackingNumber != null ? String(trackingNumber).trim() : '';
+  const nt = notes != null ? String(notes).trim() : '';
+  if (!tn && !nt) {
+    return res.redirect('/');
+  }
+  try {
+    await createUpcomingHaul({
+      trackingNumber: tn || null,
+      notes: nt || null,
+      profileId,
+    });
+  } catch (err) {
+    // ignore
+  }
+  res.redirect('/');
+});
+
+app.post('/upcoming-hauls/:id/delete', async (req, res) => {
+  const profileId = getProfileIdFromRequest(req);
+  if (!profileId) return res.redirect('/profiles');
+  const id = parseInt(req.params.id, 10);
+  if (!Number.isNaN(id)) {
+    try {
+      await deleteUpcomingHaulForProfile(id, profileId);
+    } catch (err) {
+      // ignore
+    }
+  }
+  res.redirect('/');
 });
 
 app.post('/hauls', upload.single('haulImage'), async (req, res) => {
