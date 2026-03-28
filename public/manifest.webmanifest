@@ -3,8 +3,8 @@
   "short_name": "HaulTracker",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#020617",
-  "theme_color": "#050816",
+  "background_color": "#0b0b11",
+  "theme_color": "#0b0b11",
   "description": "Mobile-first PWA for tracking reselling hauls.",
   "icons": [
     {
