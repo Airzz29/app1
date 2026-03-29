@@ -124,3 +124,47 @@
   </div>
 </div>
 
+<div id="upcomingHaulModal" class="modal-backdrop" aria-hidden="true" data-modal>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="upcomingHaulModalTitle">
+    <div class="modal-header">
+      <div>
+        <p class="label">Upcoming haul</p>
+        <h2 id="upcomingHaulModalTitle" class="modal-title">Add upcoming haul</h2>
+      </div>
+      <button class="icon-button" type="button" aria-label="Close" data-modal-close>
+        ✕
+      </button>
+    </div>
+
+    <form class="modal-form" action="/upcoming-hauls" method="POST" novalidate>
+      <p class="empty-state-text upcoming-modal-intro">
+        For hauls you&apos;re buying soon. No sell-by date required. Add a tracking number and optional notes (e.g. items you plan to buy).
+      </p>
+      <div class="form-group">
+        <label for="upcomingTrackingNumber" class="form-label">Tracking number</label>
+        <input
+          id="upcomingTrackingNumber"
+          name="trackingNumber"
+          type="text"
+          class="input"
+          autocomplete="off"
+          placeholder="Optional — add when you have it"
+        />
+      </div>
+      <div class="form-group">
+        <label for="upcomingNotes" class="form-label">Notes / items</label>
+        <textarea
+          id="upcomingNotes"
+          name="notes"
+          rows="4"
+          class="input planning-textarea"
+          placeholder="Optional — list planned items or other details"
+        ></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" data-modal-close>Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
